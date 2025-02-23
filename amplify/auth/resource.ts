@@ -1,4 +1,5 @@
 import { defineAuth } from "@aws-amplify/backend";
+import { preSignUp } from './pre-sign-up/resource';
 
 export const auth = defineAuth({
   loginWith: {
@@ -9,4 +10,7 @@ export const auth = defineAuth({
         `Use this code to confirm your account: ${createCode()}`,
     },
   },
+  triggers: {
+    preSignUp
+  }
 });

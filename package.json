@@ -13,12 +13,14 @@
     "@aws-amplify/ui-react": "^6.9.1",
     "aws-amplify": "^6.13.1",
     "react": "^19.0.0",
+    "react-animated-text": "^0.1.4",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.14.1",
     "@aws-amplify/backend-cli": "^1.4.11",
     "@eslint/js": "^9.19.0",
+    "@types/aws-lambda": "^8.10.147",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

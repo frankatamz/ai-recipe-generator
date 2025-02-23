@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { sayHello } from "../functions/say-hello/resource";
 
 const schema = a.schema({
   BedrockResponse: a.customType({
@@ -14,6 +15,15 @@ const schema = a.schema({
       .handler(
           a.handler.custom({ entry: "./bedrock.js", dataSource: "bedrockDS" })
       ),
+
+  sayHello: a
+      .query()
+      .arguments({
+        name: a.string(),
+      })
+      .returns(a.string())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(sayHello)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
