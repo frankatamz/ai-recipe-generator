@@ -14,27 +14,37 @@ const amplifyClient = generateClient<Schema>({
     authMode: "userPool",
 });
 
+const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
+
+enum DialogType {
+    Question = "Question",
+    Answer = "Answer"
+}
+
+interface Dialog {
+    time: string,
+    type: DialogType,
+    text: string
+}
+
 function App() {
     const [input, setInput] = useState("");
-    const [dialogs, setDialogs] = useState([]);
+    const [dialogs, setDialogs] = useState<Dialog[]>([]);
     const [isWaiting, setIsWaiting] = useState(false);
-    const scrollableDivRef = useRef(null);
-    const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
+    const scrollableDivRef = useRef<null | HTMLDivElement>(null);
 
     // Function to fetch from our backend and update dialog array
-    async function askAgent(e) {
+    async function askAgent(e: any) {
         setIsWaiting(true);
 
-        const question = {
-            time: getTimestamp(),
-            type: "Q",
-            text: e.input
+        const question: Dialog = {
+            time: getTimestamp(), type: DialogType.Question, text: e.input
         }
         let newDialogs = [...dialogs];
         newDialogs.push(question);
         setDialogs(newDialogs);
 
-        let answer;
+        let answer: Dialog = {time: "", type: DialogType.Answer, text: ""};
 
         try {
             const response = await amplifyClient.queries.sayHello({
@@ -42,16 +52,12 @@ function App() {
             });
 
             answer = {
-                time: getTimestamp(),
-                type: "A",
-                text: response.data,
+                time: getTimestamp(), type: DialogType.Answer, text: response.data == null ? "Null response" : response.data,
             };
 
-        } catch (err) {
+        } catch (err: any) {
             answer = {
-                time: getTimestamp(),
-                type: "A",
-                text: err
+                time: getTimestamp(), type: DialogType.Answer, text: err.message
             };
         }
         finally {
@@ -62,17 +68,19 @@ function App() {
         }
     }
 
-    const handleKeyDown = (event) => { // bind to Enter key
+    const handleKeyDown = (event: any) => { // bind to Enter key
         if (event.key === 'Enter') {
             askAgent({input});
         }
     };
 
     useEffect(() => { // automatically scroll to bottom when display text is updated
-        scrollableDivRef.current.scrollTo({
-            top: scrollableDivRef.current.scrollHeight,
-            behavior: 'smooth',
-        });
+        if (scrollableDivRef.current != null) {
+            scrollableDivRef.current.scrollTo({
+                top: scrollableDivRef.current.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
     }, [dialogs]);
 
     return (
@@ -84,8 +92,8 @@ function App() {
                     {
                         dialogs.map((dialog, index) => {
                             return (
-                                <div key={index} align="left" style={{backgroundColor: dialog.type == "Q" ? '#f5f5f5' : '#f5e9e9', color: 'black', marginLeft: '1%', marginRight: '1%', marginBottom: '1%'}}>
-                                    <span style={{color: "gray"}}>[{dialog.time}]</span> <b>{dialog.type}:</b> {dialog.text}
+                                <div key={index} style={{borderRadius: '4px', backgroundColor: dialog.type == DialogType.Question ? '#f5f5f5' : '#f5e9e9', color: 'black', marginLeft: '1%', marginRight: '1%', marginBottom: '1%'}}>
+                                    <span style={{color: "gray"}}>&nbsp;[{dialog.time}]</span> <b>{dialog.type}:</b> {dialog.text}
                                 </div>
                             )
                         })
