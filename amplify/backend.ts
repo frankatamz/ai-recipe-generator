@@ -2,31 +2,34 @@ import { defineBackend } from "@aws-amplify/backend";
 import { data } from "./data/resource";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { auth } from "./auth/resource";
-import { sayHello } from './functions/say-hello/resource';
+import { askAgent } from './functions/ask-agent/resource';
+import {preSignUp} from "./auth/pre-sign-up/resource";
 
 const backend = defineBackend({
-  auth,
-  data,
-  sayHello
+    auth,
+    data,
+    askAgent,
+    preSignUp
 });
 
-const bedrockDataSource = backend.data.resources.graphqlApi.addHttpDataSource(
-  "bedrockDS",
-  "https://bedrock-runtime.us-east-1.amazonaws.com",
-  {
-    authorizationConfig: {
-      signingRegion: "us-east-1",
-      signingServiceName: "bedrock",
-    },
-  }
+// https://docs.amplify.aws/react/build-a-backend/functions/grant-access-to-other-resources/#using-cdk
+backend.askAgent.resources.lambda.grantPrincipal.addToPrincipalPolicy(
+    new PolicyStatement({
+        resources: ["*"],
+        actions: ["bedrock:InvokeAgent"],
+    })
 );
 
-bedrockDataSource.grantPrincipal.addToPrincipalPolicy(
-  new PolicyStatement({
-    resources: [
-      "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
-    ],
-    actions: ["bedrock:InvokeModel"],
-    
-  })
+backend.askAgent.resources.lambda.grantPrincipal.addToPrincipalPolicy(
+    new PolicyStatement({
+        resources: ["*"],
+        actions: ["ssm:GetParameter"],
+    })
+);
+
+backend.preSignUp.resources.lambda.grantPrincipal.addToPrincipalPolicy(
+    new PolicyStatement({
+        resources: ["*"],
+        actions: ["ssm:GetParameter"],
+    })
 );

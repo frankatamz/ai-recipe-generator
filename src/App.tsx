@@ -17,8 +17,8 @@ const amplifyClient = generateClient<Schema>({
 const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
 
 enum DialogType {
-    Question = "Question",
-    Answer = "Answer"
+    Question = "Q",
+    Answer = "A"
 }
 
 interface Dialog {
@@ -47,8 +47,8 @@ function App() {
         let answer: Dialog = {time: "", type: DialogType.Answer, text: ""};
 
         try {
-            const response = await amplifyClient.queries.sayHello({
-                name: question.text
+            const response = await amplifyClient.queries.askAgent({
+                question: question.text, sessionId: "12345"
             });
 
             answer = {
