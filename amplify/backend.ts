@@ -42,14 +42,14 @@ backend.preSignUp.resources.lambda.grantPrincipal.addToPrincipalPolicy(
     })
 );
 
-const backendStack = backend.createStack("BackendStack");
-
-const table = new Table(backendStack, `AgentAccessLogDDBTable`, {
-    partitionKey: {name: 'user_name', type: AttributeType.STRING},
-    sortKey: {name: 'access_time', type: AttributeType.STRING},
-    tableName: `AgentAccessLog`,
-    pointInTimeRecovery: true,
-    billingMode: BillingMode.PAY_PER_REQUEST,
-    encryption: TableEncryption.AWS_MANAGED,
-    deletionProtection: true
-});
+// const backendStack = backend.createStack("BackendStack");
+//
+// const table = new Table(backendStack, `AgentAccessLogDDBTable`, {
+//     partitionKey: {name: 'user_name', type: AttributeType.STRING},
+//     sortKey: {name: 'access_time', type: AttributeType.STRING},
+//     tableName: `AgentAccessLog`,
+//     pointInTimeRecovery: true,
+//     billingMode: BillingMode.PAY_PER_REQUEST,
+//     encryption: TableEncryption.AWS_MANAGED,
+//     deletionProtection: true
+// });
