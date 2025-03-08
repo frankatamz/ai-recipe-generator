@@ -17,9 +17,9 @@ const amplifyClient = generateClient<Schema>({
 const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
 
 enum DialogType {
-    InstructionInfo = "Instructions",
-    SampleQuestionInfo = "Sample questions",
-    ContactInfo = "Contacts",
+    InstructionInfo = "🛠️ Instructions",
+    SampleQuestionInfo = "❓Sample questions",
+    ContactInfo = "☎️ Contacts",
     Question = "Q",
     Answer = "A"
 }
@@ -38,16 +38,16 @@ interface Dialog {
 
 function App() {
     const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: "" +
-            "(1) If you're a DEVELOPER and need to troubleshoot issues, use VERBOSE mode (red) to get more details, " +
-            "otherwise use SIMPLE mode (green). (2) RESPONSE TIME varies depending on how many actions the agent needs to take " +
-            "to find an answer. Majority of answers takes 5-20 seconds. (3) If you want to leave a FEEDBACK " +
-            "to us (general comment, feature request, bug report, etc), prepend your message with a " +
-            "#feedback hashtag (e.g., \"#feedback Can you improve the latency?\")"}
+            "🔎 If you're a DEVELOPER and need to troubleshoot issues, use VERBOSE mode (red) to get more details, " +
+            "otherwise use SIMPLE mode (green). ⏰ RESPONSE TIME varies depending on how many actions the agent needs to take " +
+            "to find an answer. Majority of answers take 5-20 seconds. 🔁 To leave a FEEDBACK to us (general comment, " +
+            "feature request, bug report, etc), prepend your message with a #feedback hashtag " +
+            "(e.g., \"#feedback Can you improve the latency?\")"}
     const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: "" +
-            "(1) What is the reporting status of transaction 33241774?\n" +
-            "(2) Invoice 1112085784 is still open in OFA, do you know why?\n" +
-            "(3) Is transaction 33159494 reported to OFA? " +
-            "(4) Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)"};
+            "💬 What is the reporting status of transaction 33241774?\n" +
+            "💬 Invoice 1112085784 is still open in OFA, do you know why?\n" +
+            "💬 Is transaction 33159494 reported to OFA? " +
+            "💬 Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)"};
     const contact: Dialog = {time: "", type: DialogType.ContactInfo, mode: AnswerMode.Simple, text: "hhn@, dhuphims@"};
     const [dialogs, setDialogs] = useState<Dialog[]>([instruction, sampleQuestion, contact]);
     const [input, setInput] = useState("");
