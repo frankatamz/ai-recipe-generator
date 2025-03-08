@@ -17,6 +17,9 @@ const amplifyClient = generateClient<Schema>({
 const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
 
 enum DialogType {
+    InstructionInfo = "Instructions",
+    SampleQuestionInfo = "Sample questions",
+    ContactInfo = "Contacts",
     Question = "Q",
     Answer = "A"
 }
@@ -34,12 +37,34 @@ interface Dialog {
 }
 
 function App() {
+    const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: "" +
+            "(1) If you're a DEVELOPER and need to troubleshoot issues, use VERBOSE mode (red) to get more details, " +
+            "otherwise use SIMPLE mode (green). (2) RESPONSE TIME varies depending on how many actions the agent needs to take " +
+            "to find an answer. Majority of answers takes 5-20 seconds. (3) If you want to leave a FEEDBACK " +
+            "to us (general comment, feature request, bug report, etc), prepend your message with a " +
+            "#feedback hashtag (e.g., \"#feedback Can you improve the latency?\")"}
+    const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: "" +
+            "(1) What is the reporting status of transaction 33241774?\n" +
+            "(2) Invoice 1112085784 is still open in OFA, do you know why?\n" +
+            "(3) Is transaction 33159494 reported to OFA? " +
+            "(4) Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)"};
+    const contact: Dialog = {time: "", type: DialogType.ContactInfo, mode: AnswerMode.Simple, text: "hhn@, dhuphims@"};
+    const [dialogs, setDialogs] = useState<Dialog[]>([instruction, sampleQuestion, contact]);
     const [input, setInput] = useState("");
-    const [dialogs, setDialogs] = useState<Dialog[]>([]);
     const [isWaiting, setIsWaiting] = useState(false);
     const scrollableDivRef = useRef<null | HTMLDivElement>(null);
     const [answerMode, setAnswerMode] = useState<AnswerMode>(AnswerMode.Simple);
 
+    async function withTimeout<T>(promise: Promise<T>, timeoutInMillis: number): Promise<T> {
+        return Promise.race([
+            promise,
+            new Promise<T>((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, timeoutInMillis);
+            }),
+        ]);
+    }
 
     // Function to fetch from our backend and update dialog array
     async function askAgent(e: any) {
@@ -55,9 +80,8 @@ function App() {
         let answer: Dialog = {time: "", type: DialogType.Answer, mode: question.mode, text: ""};
 
         try {
-            const response = await amplifyClient.queries.askAgent({
-                question: question.text, sessionId: "12345", mode: question.mode.toUpperCase()
-            });
+            const request = {question: question.text, sessionId: "12345", mode: question.mode.toUpperCase()};
+            const response = await withTimeout(amplifyClient.queries.askAgent(request), 60000);
 
             answer = {
                 time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: response.data == null ? "Null response" : response.data,
@@ -97,24 +121,48 @@ function App() {
 
     return (
         <div className="App" style={{ height: '90vh', fontFamily:"San Francisco Pro"}}>
-            <div style={{marginTop: '-2%', textAlign: "center"}}><span style={{color: 'red', marginRight: '2%'}}>@agent_phoenix 🐦‍🔥  </span>
+            <div style={{marginTop: '-2%', textAlign: "center"}}>
+                <span style={{color: 'red', marginRight: '2%'}}><b>@agent_phoenix 🐦‍🔥</b></span>
                 <span style={{color: 'black'}}>Mode: </span>
-                <select disabled={isWaiting} value={answerMode} onChange={updateAnswerMode}>
+                <select disabled={isWaiting} value={answerMode} onChange={updateAnswerMode} style={{marginRight: '5%'}}>
                     <option value={AnswerMode.Simple}>Simple</option>
                     <option value={AnswerMode.Verbose}>Verbose</option>
                 </select>
             </div>
 
-
             <div style={{borderRadius: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '80%', marginLeft: '20%', marginRight: '20%', marginTop: '1%', border: 'solid gray'}}>
                 <div ref={scrollableDivRef} style={{overflowY: 'auto'}}>
                     {
                         dialogs.map((dialog, index) => {
-                            return (
-                                <div key={index} style={{borderRadius: '4px', backgroundColor: dialog.type == DialogType.Question ? '#f5f5f5' : (dialog.mode == AnswerMode.Simple ? '#e9f5e9' : '#f5e9e9'), color: 'black', marginLeft: '1%', marginRight: '1%', marginBottom: '1%'}}>
-                                    <span style={{color: "gray"}}>&nbsp;[{dialog.time}]</span> <b>{dialog.type}{dialog.type == DialogType.Question ? "" : ` (${dialog.mode})`}:</b> {dialog.text}
-                                </div>
-                            )
+                            if (dialog.type != DialogType.Question && dialog.type != DialogType.Answer) {
+                                return (
+                                    <div key={index} style={{
+                                        borderRadius: '4px',
+                                        backgroundColor: '#f5f5f5',
+                                        color: 'black',
+                                        marginLeft: '1%',
+                                        marginRight: '1%',
+                                        marginBottom: '1%'
+                                    }}>
+                                        &nbsp;<b>{dialog.type}:</b> {dialog.text}
+                                    </div>
+                                )
+                            }
+                            else {
+                                return (
+                                    <div key={index} style={{
+                                        borderRadius: '4px',
+                                        backgroundColor: dialog.type == DialogType.Question ? '#e9e9f5' : (dialog.mode == AnswerMode.Simple ? '#e9f5e9' : '#f5e9e9'),
+                                        color: 'black',
+                                        marginLeft: '1%',
+                                        marginRight: '1%',
+                                        marginBottom: '1%'
+                                    }}>
+                                        <span style={{color: "gray"}}>&nbsp;[{dialog.time}UTC] </span>
+                                        <b>{dialog.type}:</b> {dialog.text}
+                                    </div>
+                                )
+                            }
                         })
                     }
                 </div>
