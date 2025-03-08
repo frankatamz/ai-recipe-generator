@@ -21,8 +21,8 @@ export const handler: PreSignUpTriggerHandler = async (event) => {
     console.log(`Email: ${email} has allowlist status: ${isEmailAllowlisted}`);
 
     if (!isEmailAllowlisted) {
-        await new Promise(f => setTimeout(f, 5000))
-        throw new Error('Invalid email');
+        await new Promise(f => setTimeout(f, 1000))
+        throw new Error(`Email: ${email} is not allowlisted.`);
     }
 
     return event;

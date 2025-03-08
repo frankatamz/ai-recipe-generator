@@ -4,7 +4,7 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { auth } from "./auth/resource";
 import { askAgent } from './functions/ask-agent/resource';
 import {preSignUp} from "./auth/pre-sign-up/resource";
-import {AttributeType, BillingMode, ProjectionType, TableEncryption, Table, CfnTable} from 'aws-cdk-lib/aws-dynamodb'
+// import {AttributeType, BillingMode, ProjectionType, TableEncryption, Table, CfnTable} from 'aws-cdk-lib/aws-dynamodb'
 
 const backend = defineBackend({
     auth,

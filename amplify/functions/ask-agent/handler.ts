@@ -18,10 +18,11 @@ const getParameter = async (key: string): Promise<string> => {
     return response.Parameter == undefined || response.Parameter.Value == undefined ? "" : response.Parameter.Value;
 }
 
-const invokeBedrockAgent = async (prompt: string, sessionId: string): Promise<string> => {
+const invokeBedrockAgent = async (prompt: string, sessionId: string, mode: string): Promise<string> => {
     const agentId = await getParameter("BEDROCK_AGENT_ID");
-    const agentAliasId = await getParameter("BEDROCK_AGENT_ALIAS_ID");
-    console.log(`Prepare to invoke Bedrock Agent: ${agentId}/${agentAliasId}, prompt: ${prompt}, sessionId: ${sessionId}`);
+    const agentAliasId = await getParameter(`BEDROCK_AGENT_${mode.toUpperCase()}_MODE_ALIAS_ID`);
+
+    console.log(`Prepare to invoke Bedrock Agent: ${agentId}/${agentAliasId} (mode: ${mode}), prompt: ${prompt}, sessionId: ${sessionId}`);
 
     const command = new InvokeAgentCommand({
         agentId,
@@ -58,6 +59,7 @@ const invokeBedrockAgent = async (prompt: string, sessionId: string): Promise<st
 const getAnswer = async (event: any): Promise<string> => {
     const question = event.arguments.question;
     const sessionId = event.arguments.sessionId;
+    const mode = event.arguments.mode;
 
     // If agent is not enabled, take a nap for some random seconds and return
     const bedrockAgentEnabled = await getParameter("BEDROCK_AGENT_ENABLED");
@@ -67,7 +69,7 @@ const getAnswer = async (event: any): Promise<string> => {
     }
 
     else {
-        return invokeBedrockAgent(question, sessionId);
+        return invokeBedrockAgent(question, sessionId, mode);
     }
 }
 

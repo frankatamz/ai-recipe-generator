@@ -21,10 +21,16 @@ enum DialogType {
     Answer = "A"
 }
 
+enum AnswerMode {
+    Simple = "Simple",
+    Verbose = "Verbose"
+}
+
 interface Dialog {
     time: string,
     type: DialogType,
-    text: string
+    mode: AnswerMode
+    text: string,
 }
 
 function App() {
@@ -32,32 +38,34 @@ function App() {
     const [dialogs, setDialogs] = useState<Dialog[]>([]);
     const [isWaiting, setIsWaiting] = useState(false);
     const scrollableDivRef = useRef<null | HTMLDivElement>(null);
+    const [answerMode, setAnswerMode] = useState<AnswerMode>(AnswerMode.Simple);
+
 
     // Function to fetch from our backend and update dialog array
     async function askAgent(e: any) {
         setIsWaiting(true);
 
         const question: Dialog = {
-            time: getTimestamp(), type: DialogType.Question, text: e.input
+            time: getTimestamp(), type: DialogType.Question, mode: answerMode, text: e.input
         }
         let newDialogs = [...dialogs];
         newDialogs.push(question);
         setDialogs(newDialogs);
 
-        let answer: Dialog = {time: "", type: DialogType.Answer, text: ""};
+        let answer: Dialog = {time: "", type: DialogType.Answer, mode: question.mode, text: ""};
 
         try {
             const response = await amplifyClient.queries.askAgent({
-                question: question.text, sessionId: "12345"
+                question: question.text, sessionId: "12345", mode: question.mode.toUpperCase()
             });
 
             answer = {
-                time: getTimestamp(), type: DialogType.Answer, text: response.data == null ? "Null response" : response.data,
+                time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: response.data == null ? "Null response" : response.data,
             };
 
         } catch (err: any) {
             answer = {
-                time: getTimestamp(), type: DialogType.Answer, text: err.message
+                time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: err.message
             };
         }
         finally {
@@ -83,17 +91,28 @@ function App() {
         }
     }, [dialogs]);
 
+    const updateAnswerMode = (event: any) => {
+        setAnswerMode(event.target.value);
+    };
+
     return (
         <div className="App" style={{ height: '90vh', fontFamily:"San Francisco Pro"}}>
-            <h3  style={{color: 'red', marginTop: '-2%', textAlign: "center"}}>@agent_phoenix <span >🐦‍🔥</span></h3>
+            <div style={{marginTop: '-2%', textAlign: "center"}}><span style={{color: 'red', marginRight: '2%'}}>@agent_phoenix 🐦‍🔥  </span>
+                <span style={{color: 'black'}}>Mode: </span>
+                <select disabled={isWaiting} value={answerMode} onChange={updateAnswerMode}>
+                    <option value={AnswerMode.Simple}>Simple</option>
+                    <option value={AnswerMode.Verbose}>Verbose</option>
+                </select>
+            </div>
+
 
             <div style={{borderRadius: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '80%', marginLeft: '20%', marginRight: '20%', marginTop: '1%', border: 'solid gray'}}>
                 <div ref={scrollableDivRef} style={{overflowY: 'auto'}}>
                     {
                         dialogs.map((dialog, index) => {
                             return (
-                                <div key={index} style={{borderRadius: '4px', backgroundColor: dialog.type == DialogType.Question ? '#f5f5f5' : '#f5e9e9', color: 'black', marginLeft: '1%', marginRight: '1%', marginBottom: '1%'}}>
-                                    <span style={{color: "gray"}}>&nbsp;[{dialog.time}]</span> <b>{dialog.type}:</b> {dialog.text}
+                                <div key={index} style={{borderRadius: '4px', backgroundColor: dialog.type == DialogType.Question ? '#f5f5f5' : (dialog.mode == AnswerMode.Simple ? '#e9f5e9' : '#f5e9e9'), color: 'black', marginLeft: '1%', marginRight: '1%', marginBottom: '1%'}}>
+                                    <span style={{color: "gray"}}>&nbsp;[{dialog.time}]</span> <b>{dialog.type}{dialog.type == DialogType.Question ? "" : ` (${dialog.mode})`}:</b> {dialog.text}
                                 </div>
                             )
                         })

@@ -6,7 +6,8 @@ const schema = a.schema({
       .query()
       .arguments({
         question: a.string(),
-        sessionId: a.string()
+        sessionId: a.string(),
+        mode: a.string()
       })
       .returns(a.string())
       .authorization((allow) => [allow.authenticated()])
