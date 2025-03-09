@@ -17,9 +17,9 @@ const amplifyClient = generateClient<Schema>({
 const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
 
 enum DialogType {
-    InstructionInfo = "🛠️ Instructions",
+    InstructionInfo = "📜️ Instructions",
     SampleQuestionInfo = "❓Sample questions",
-    ContactInfo = "☎️ Contacts",
+    ContactInfo = "📞️ Contacts",
     Question = "Q",
     Answer = "A"
 }
@@ -38,9 +38,10 @@ interface Dialog {
 
 function App() {
     const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: `
-        🔎 If you are a developer and need to troubleshoot issues, use Verbose mode to get more detailed answers. Otherwise use Simple mode. 
-        ⏳ Response time varies depending on how many actions the agent needs to take to arrive at an answer. Most answers take 5-20 seconds. 
-        🗒️ If you want to leave us some feedback (general comments, feature requests, bug reports, etc), prepend your message with a #feedback hashtag (e.g., \"#feedback Can you improve the latency?\")`}
+        🛠 If you are a developer and need to troubleshoot issues, use Verbose mode to get more detailed answers. Otherwise use Simple mode.
+        ⏳ Response time varies depending on how many actions the agent needs to take to arrive at an answer. Most answers take 5-20 seconds.
+        🎛️ Each user is currently limited to 4 questions per minute.
+        📩 If you want to leave us some feedback (general comments, feature requests, bug reports, etc), prepend your message with a #feedback hashtag (e.g., \"#feedback Can you improve the latency?\")`}
     const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: `
         💬 What is the reporting status of transaction 33241774?
         💬 Invoice 1112085784 is still open in OFA, do you know why?
@@ -66,11 +67,14 @@ function App() {
 
     // Function to fetch from our backend and update dialog array
     async function askAgent(e: any) {
+        const input = e.input.trim();
+        if (input == "") {
+            return;
+        }
+
         setIsWaiting(true);
 
-        const question: Dialog = {
-            time: getTimestamp(), type: DialogType.Question, mode: answerMode, text: e.input
-        }
+        const question: Dialog = {time: getTimestamp(), type: DialogType.Question, mode: answerMode, text: input};
         let newDialogs = [...dialogs];
         newDialogs.push(question);
         setDialogs(newDialogs);
@@ -84,7 +88,6 @@ function App() {
             answer = {
                 time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: response.data == null ? "Null response" : response.data,
             };
-
         } catch (err: any) {
             answer = {
                 time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: err.message
@@ -98,12 +101,6 @@ function App() {
         }
     }
 
-    const handleKeyDown = (event: any) => { // bind to Enter key
-        if (event.key === 'Enter') {
-            askAgent({input});
-        }
-    };
-
     useEffect(() => { // automatically scroll to bottom when display text is updated
         if (scrollableDivRef.current != null) {
             scrollableDivRef.current.scrollTo({
@@ -112,6 +109,13 @@ function App() {
             });
         }
     }, [dialogs]);
+
+
+    const handleKeyDown = (event: any) => { // bind Enter key to askAgent method
+        if (event.key === 'Enter') {
+            askAgent({input});
+        }
+    };
 
     const updateAnswerMode = (event: any) => {
         setAnswerMode(event.target.value);
