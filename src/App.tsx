@@ -19,7 +19,6 @@ const getTimestamp = () => {return new Date().toISOString().slice(0, 19)};
 enum DialogType {
     InstructionInfo = "📜️ Instructions",
     SampleQuestionInfo = "❓Sample questions",
-    ContactInfo = "📞️ Contacts",
     Question = "Q",
     Answer = "A"
 }
@@ -38,17 +37,16 @@ interface Dialog {
 
 function App() {
     const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: `
-        🛠 If you are a developer and need to troubleshoot issues, use Verbose mode to get more detailed answers. Otherwise use Simple mode.
-        ⏳ Response time varies depending on how many actions the agent needs to take to arrive at an answer. Most answers take 5-20 seconds.
-        🎛️ Each user is currently limited to 4 questions per minute.
-        📩 If you want to leave us some feedback (general comments, feature requests, bug reports, etc), prepend your message with a #feedback hashtag (e.g., \"#feedback Can you improve the latency?\")`}
+        🤖 I'm an Amazon Bedrock Agent designed to help troubleshoot payments-related issues. For now I'm only supported in Beta and each user is limited to 4 questions per minute.
+        ⏳ Response time varies depending on the number of actions the agent needs to take to find an answer. Most answers take 5-20 seconds.
+        🛠 If you are a developer and need to troubleshoot issues, Verbose mode can provide more (sometimes too much) details. Otherwise use Simple mode.
+        📩 If you think my response is inaccurate, please let the team know by prepending your message with a #feedback hashtag (e.g., \"#feedback Transaction XYZ was reported to OFA but the agent said otherwise\"). For general comments and questions, allowlist requests, feature requests, bug reports, etc., please reach out to us directly on Slack (hhn@, dhuphims@).`}
     const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: `
         💬 What is the reporting status of transaction 33241774?
         💬 Invoice 1112085784 is still open in OFA, do you know why?
         💬 Is transaction 33159494 reported to OFA?
         💬 Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)`};
-    const contact: Dialog = {time: "", type: DialogType.ContactInfo, mode: AnswerMode.Simple, text: `hhn@, dhuphims@`};
-    const [dialogs, setDialogs] = useState<Dialog[]>([instruction, sampleQuestion, contact]);
+    const [dialogs, setDialogs] = useState<Dialog[]>([instruction, sampleQuestion]);
     const [input, setInput] = useState("");
     const [isWaiting, setIsWaiting] = useState(false);
     const scrollableDivRef = useRef<null | HTMLDivElement>(null);
@@ -124,9 +122,9 @@ function App() {
     return (
         <div className="App" style={{ height: '90vh', fontFamily:"San Francisco Pro"}}>
             <div style={{marginTop: '-2%', textAlign: "center"}}>
-                <span style={{color: 'red', marginRight: '2%'}}><b>@agent_phoenix 🐦‍🔥</b></span>
+                <span style={{color: 'black', marginRight: '5%'}}><b>🐦‍🔥 Agent Phoenix</b><sup style={{color: 'black'}}>✨beta</sup></span>
                 <span style={{color: 'black'}}>Mode: </span>
-                <select disabled={isWaiting} value={answerMode} onChange={updateAnswerMode} style={{marginRight: '5%'}}>
+                <select disabled={isWaiting} value={answerMode} onChange={updateAnswerMode}>
                     <option value={AnswerMode.Simple}>Simple</option>
                     <option value={AnswerMode.Verbose}>Verbose</option>
                 </select>
