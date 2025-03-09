@@ -37,18 +37,16 @@ interface Dialog {
 }
 
 function App() {
-    const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: "" +
-            "🔎 If you're a DEVELOPER and need to troubleshoot issues, use VERBOSE mode (red) to get more details, " +
-            "otherwise use SIMPLE mode (green). ⏰ RESPONSE TIME varies depending on how many actions the agent needs to take " +
-            "to find an answer. Majority of answers take 5-20 seconds. 🔁 To leave a FEEDBACK to us (general comment, " +
-            "feature request, bug report, etc), prepend your message with a #feedback hashtag " +
-            "(e.g., \"#feedback Can you improve the latency?\")"}
-    const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: "" +
-            "💬 What is the reporting status of transaction 33241774?\n" +
-            "💬 Invoice 1112085784 is still open in OFA, do you know why?\n" +
-            "💬 Is transaction 33159494 reported to OFA? " +
-            "💬 Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)"};
-    const contact: Dialog = {time: "", type: DialogType.ContactInfo, mode: AnswerMode.Simple, text: "hhn@, dhuphims@"};
+    const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: `
+        🔎 If you are a developer and need to troubleshoot issues, use Verbose mode to get more detailed answers. Otherwise use Simple mode. 
+        ⏳ Response time varies depending on how many actions the agent needs to take to arrive at an answer. Most answers take 5-20 seconds. 
+        🗒️ If you want to leave us some feedback (general comments, feature requests, bug reports, etc), prepend your message with a #feedback hashtag (e.g., \"#feedback Can you improve the latency?\")`}
+    const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: `
+        💬 What is the reporting status of transaction 33241774?
+        💬 Invoice 1112085784 is still open in OFA, do you know why?
+        💬 Is transaction 33159494 reported to OFA?
+        💬 Is invoice CO-171458165796599 closed in OFA? (Follow up: What should I do?)`};
+    const contact: Dialog = {time: "", type: DialogType.ContactInfo, mode: AnswerMode.Simple, text: `hhn@, dhuphims@`};
     const [dialogs, setDialogs] = useState<Dialog[]>([instruction, sampleQuestion, contact]);
     const [input, setInput] = useState("");
     const [isWaiting, setIsWaiting] = useState(false);
@@ -142,7 +140,8 @@ function App() {
                                         color: 'black',
                                         marginLeft: '1%',
                                         marginRight: '1%',
-                                        marginBottom: '1%'
+                                        marginBottom: '1%',
+                                        whiteSpace: "pre-wrap"
                                     }}>
                                         &nbsp;<b>{dialog.type}:</b> {dialog.text}
                                     </div>
@@ -159,7 +158,7 @@ function App() {
                                         marginBottom: '1%'
                                     }}>
                                         <span style={{color: "gray"}}>&nbsp;[{dialog.time}UTC] </span>
-                                        <b>{dialog.type}:</b> {dialog.text}
+                                        <b>{dialog.type}{dialog.type == DialogType.Question ? "" : ` (${dialog.mode})`}:</b> {dialog.text}
                                     </div>
                                 )
                             }
