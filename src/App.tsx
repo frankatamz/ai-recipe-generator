@@ -37,10 +37,10 @@ interface Dialog {
 
 function App() {
     const instruction: Dialog = {time: "", type: DialogType.InstructionInfo, mode: AnswerMode.Simple, text: `
-        🤖 I'm an Amazon Bedrock Agent designed to help troubleshoot payments-related issues. For now I'm only supported in Beta and each user is limited to 4 questions per minute.
-        ⏳ Response time varies depending on the number of actions the agent needs to take to find an answer. Most answers take 5-20 seconds.
-        🛠 If you are a developer and need to troubleshoot issues, Verbose mode can provide more (sometimes too much) details. Otherwise use Simple mode.
-        📩 If you think my response is inaccurate, please let the team know by prepending your message with a #feedback hashtag (e.g., \"#feedback Transaction XYZ was reported to OFA but the agent said otherwise\"). For general comments and questions, allowlist requests, feature requests, bug reports, etc., please reach out to us directly on Slack (hhn@, dhuphims@).`}
+        🤖 Beep boop...I'm an Amazon Bedrock Agent designed to help troubleshoot payments-related issues. For now I'm only supported in Beta and each user is limited to 4 questions per minute.
+        ⏳ Response time varies depending on the number of actions I need to take to find an answer. Most question take 5-20 seconds. 🪲 Known issue: Due to AppSync's 30-second hard limit, a question that takes more than 30 seconds to process will be timed out. As a walk-around you can ask me the same question again.
+        🛠 If you are a developer and need to troubleshoot issues, Verbose mode provides more (and sometimes too much) details. Otherwise use Simple mode.
+        📩 If you think my response is inaccurate, please let the team know by prepending your message with a #feedback hashtag (e.g., \"#feedback Transaction XYZ was reported to OFA but the agent said otherwise\"). For general comments and questions, allowlist requests, feature requests, bug reports, etc., please reach out to the team directly on Slack (hhn@, dhuphims@).`}
     const sampleQuestion: Dialog = {time: "", type: DialogType.SampleQuestionInfo, mode: AnswerMode.Simple, text: `
         💬 What is the reporting status of transaction 33241774?
         💬 Invoice 1112085784 is still open in OFA, do you know why?
@@ -84,7 +84,7 @@ function App() {
             const response = await withTimeout(amplifyClient.queries.askAgent(request), 60000);
 
             answer = {
-                time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: response.data == null ? "Null response" : response.data,
+                time: getTimestamp(), type: DialogType.Answer, mode: question.mode, text: response.data == null ? "Request timed out, please retry." : response.data,
             };
         } catch (err: any) {
             answer = {
